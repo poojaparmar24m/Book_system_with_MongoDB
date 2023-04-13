@@ -22,28 +22,31 @@ exports.getAllUser = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { id, name, surname, email, subscriptionType, subscriptionDate } =
-    req.body;
+  try {
+    const { id, name, surname, email, subscriptionType, subscriptionDate } =
+      req.body;
 
-  const Newuser = await userModel.create({
-    name,
-    surname,
-    email,
-    subscriptionType,
-    subscriptionDate,
-  });
+    const Newuser = await userModel.create({
+      name,
+      surname,
+      email,
+      subscriptionType,
+      subscriptionDate,
+    });
 
-  return res.status(201).json({
-    Success: true,
-    Message: "User Created Successfully ! ",
-    data: Newuser,
-  });
+    return res.status(201).json({
+      Success: true,
+      Message: "User Created Successfully ! ",
+      data: Newuser,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
 };
 
 exports.getUserByid = async (req, res) => {
-  const { id } = req.params;
-
   try {
+    const { id } = req.params;
     const userData = await userModel.findById({ _id: id });
 
     if (!userData) {
@@ -90,6 +93,13 @@ exports.updateUserById = async (req, res) => {
     const { id } = req.params;
     const { data } = req.body;
 
+    if (!data) {
+      return res.status(404).json({
+        Success: false,
+        Message: "No Data To Add a User !",
+      });
+    }
+
     const updateData = await userModel.findByIdAndUpdate(
       { _id: id },
       {
@@ -117,4 +127,11 @@ exports.updateUserById = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: "internal server error" });
   }
+};
+
+exports.getSubcriptionDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const subscriptionData = await userModel.findById({ _id: id });
+  } catch (error) {}
 };

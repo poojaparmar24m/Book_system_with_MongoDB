@@ -3,7 +3,7 @@ const express = require("express");
 const dbConnection = require("./Database_connection");
 // const userModel = require("./Model/User_model");
 const userRouter = require("./router/User");
-// const bookRouter = require("./router/Book");
+const bookRouter = require("./router/Book");
 
 const app = express();
 dbConnection();
@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", userRouter);
-// app.use("/books",bookRouter);
+app.use("/books", bookRouter);
 
 app.get("*", (req, res) => {
   res.status(404).json({
