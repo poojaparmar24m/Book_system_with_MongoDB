@@ -1,5 +1,6 @@
 const bookModel = require("../Model/Book_model");
-
+const userModel = require("../Model/User_model");
+const book_dto = require("../dto/Book_dto");
 exports.createBooks = async (req, res) => {
   try {
     const { name, author, price, genre, publisher } = req.body;
@@ -117,6 +118,31 @@ exports.deleteBookById = async (req, res) => {
       Success: true,
       Message: "Delete a Book successfully !",
       data: deleteData,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error !" });
+  }
+};
+
+exports.IssuedBook = async (req, res) => {
+  try {
+    const userdata = await userModel
+      .find({ issuedBook: { $exists: true } })
+      .populate("issuedBook");
+    console.log("userdata", userdata);
+    const issuedbooks = userdata.map((each) => new book_dto(each));
+
+    console.log("isssuedbook", issuedbooks);
+    if (!issuedbooks) {
+      return res.status(404).json({
+        Success: false,
+        Message: "No Book Have Been Issued Yet..",
+      });
+    }
+    return res.status(200).json({
+      Success: true,
+      Message: "Get all issued Books",
+      data: issuedbooks,
     });
   } catch (error) {
     return res.status(500).json({ error: "Internal server error !" });

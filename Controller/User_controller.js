@@ -1,4 +1,5 @@
 const userModel = require("../Model/User_model");
+// const bookModel = require("../Model/Book_model");
 
 exports.getAllUser = async (req, res) => {
   try {
@@ -23,17 +24,28 @@ exports.getAllUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const { id, name, surname, email, subscriptionType, subscriptionDate } =
-      req.body;
-
-    const Newuser = await userModel.create({
+    const {
       name,
       surname,
       email,
       subscriptionType,
       subscriptionDate,
-    });
-
+      issuedBook,
+      issuedDate,
+      returnDate,
+    } = req.body;
+    console.log("BODY", req.body);
+    const Newuser = await new userModel({
+      name,
+      surname,
+      email,
+      subscriptionType,
+      subscriptionDate,
+      issuedBook,
+      issuedDate,
+      returnDate,
+    }).save();
+    console.log("isseued", Newuser);
     return res.status(201).json({
       Success: true,
       Message: "User Created Successfully ! ",
@@ -133,5 +145,59 @@ exports.getSubcriptionDetail = async (req, res) => {
   try {
     const { id } = req.params;
     const subscriptionData = await userModel.findById({ _id: id });
-  } catch (error) {}
+
+    if (!subscriptionData) {
+      return res.status(404).json({
+        Success: false,
+        Message: "User Not Exits With Id",
+      });
+    }
+    const getDays = (data = null) => {
+      const date = data ? new Date(data) : new Date();
+      return Math.floor(date / (1000 * 60 * 60 * 24));
+    };
+
+    const subscriptionType = (date) => {
+      if (subscriptionData.subscriptionType === "Basic") {
+        date = date + 90;
+      } else if (subscriptionData.subscriptionType === "Standard") {
+        date = date + 180;
+      } else if (subscriptionData.subscriptionType === "Premium") {
+        date = date + 365;
+      }
+      return date;
+    };
+
+    let returnDate = getDays(subscriptionData.returnDate);
+    let currentDate = getDays();
+    let subscriptionDate = getDays(subscriptionData.subscriptionDate);
+    let subscriptionexpiraion = subscriptionType(subscriptionDate);
+    console.log("return date", returnDate);
+    console.log("current date", currentDate);
+    console.log("subscription date", subscriptionDate);
+    console.log("subscription expire", subscriptionexpiraion);
+
+    const data = {
+      ...subscriptionData,
+      subscriptionExpired: subscriptionexpiraion < currentDate,
+      dayLeftforExpiration:
+        subscriptionexpiraion <= currentDate
+          ? 0
+          : subscriptionexpiraion - currentDate,
+      fine:
+        returnDate < currentDate
+          ? subscriptionexpiraion <= currentDate
+            ? 100
+            : 50
+          : 0,
+    };
+
+    return res.status(200).json({
+      Success: true,
+      Message: "Get subscription details ! ",
+      data: data,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
 };

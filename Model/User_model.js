@@ -16,12 +16,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    Issuedbook: {
+    issuedBook: {
       type: mongooes.Schema.Types.ObjectId,
       ref: "Book",
       required: false,
     },
-    Issueddate: {
+    issuedDate: {
       type: String,
       required: false,
     },

@@ -6,6 +6,7 @@ const {
   getBookById,
   updateBookById,
   deleteBookById,
+  IssuedBook,
 } = require("../Controller/Book_controller");
 
 router.post("/", createBooks);
@@ -18,4 +19,5 @@ router.put("/editBook/:id", updateBookById);
 
 router.delete("/deleteBook/:id", deleteBookById);
 
+router.get("/issued/by_user", IssuedBook);
 module.exports = router;
